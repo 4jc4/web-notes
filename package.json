@@ -2,12 +2,16 @@
   "name": "web-notes",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "api:generate": "orval --config orval.config.ts"
+    "api:sync": "node scripts/sync-openapi.mjs",
+    "api:generate": "npm run api:sync && orval --config orval.config.ts"
   },
   "dependencies": {
     "next": "16.3.2",

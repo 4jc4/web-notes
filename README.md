@@ -24,17 +24,14 @@ em produção o Nginx já roteia `/api/*` direto para a API).
 
 ## Gerando o cliente da API
 
-O contrato OpenAPI ainda não tem distribuição automática entre os dois
-repositórios (ver [`docs/deployment.md`](./docs/deployment.md)). Por
-ora:
-
 ```bash
-# no repo api-notes
-npm run openapi:generate
-
-# copie api-notes/openapi/openapi.json para openapi/openapi.json aqui, depois:
 npm run api:generate
 ```
+
+Isso baixa o contrato mais recente publicado pelo `api-notes` (release
+`openapi-latest`, ver [`docs/deployment.md`](./docs/deployment.md)) e
+roda o Orval em cima dele. Não precisa ter o `api-notes` clonado nem
+rodando.
 
 Nunca edite `src/generated/api/` manualmente — corrija o contrato
 OpenAPI, `orval.config.ts` ou o mutator em `src/lib/api/fetcher.ts`, e
