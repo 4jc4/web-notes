@@ -1,12 +1,9 @@
 // Configuração do Orval para o frontend Notas.
 //
-// Status (2026-08-22): funcional. openapi/openapi.json é, por ora, uma
-// cópia manual de api-notes/openapi/openapi.json (gerado lá por
-// `npm run openapi:generate`) — a distribuição formal desse contrato
-// entre os dois repositórios (commit com script de sync, artifact de
-// CI, pacote publicado) ainda é uma decisão em aberto (ver
-// docs/deployment.md). Até essa decisão, regenerar o cliente exige
-// copiar o arquivo manualmente de novo.
+// openapi/openapi.json não é editado nem versionado aqui — é sempre
+// baixado por `npm run api:sync` (scripts/sync-openapi.mjs) a partir do
+// release `openapi-latest` do api-notes antes de rodar o Orval. Ver
+// docs/deployment.md.
 
 import { defineConfig } from 'orval';
 

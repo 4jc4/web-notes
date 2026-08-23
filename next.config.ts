@@ -12,6 +12,11 @@ import type { NextConfig } from "next";
 const API_PROXY_TARGET = process.env.API_PROXY_TARGET ?? "http://localhost:3001";
 
 const nextConfig: NextConfig = {
+  // Build de produção enxuto para a imagem Docker (ver Dockerfile) —
+  // copia só o necessário pra rodar `node server.js`, sem o
+  // node_modules completo.
+  output: "standalone",
+
   async rewrites() {
     return [
       {

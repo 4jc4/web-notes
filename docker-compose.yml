@@ -1,0 +1,20 @@
+services:
+  frontend:
+    image: ghcr.io/4jc4/web-notes:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+
+    ports:
+      - '3000:3000'
+
+    environment:
+      NODE_ENV: production
+
+    healthcheck:
+      # 127.0.0.1, não localhost: o server standalone do Next escuta só
+      # em IPv4 (HOSTNAME=0.0.0.0 no Dockerfile) — "localhost" resolve
+      # ::1 primeiro no Alpine e o wget recebe "connection refused".
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:3000/']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
