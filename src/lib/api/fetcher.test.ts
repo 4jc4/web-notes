@@ -19,7 +19,7 @@ describe("apiFetch", () => {
     );
 
     const result = await apiFetch<{ id: string; email: string }>(
-      "/api/v1/auth/login",
+      "/v1/auth/login",
     );
 
     expect(result).toEqual({ id: "1", email: "alice@example.com" });
@@ -28,16 +28,17 @@ describe("apiFetch", () => {
   it("sempre envia credentials: 'include' (sessão por cookie)", async () => {
     vi.mocked(fetch).mockResolvedValueOnce(new Response("{}", { status: 200 }));
 
-    await apiFetch("/api/v1/notes");
+    await apiFetch("/v1/notes");
 
-    const [, options] = vi.mocked(fetch).mock.calls[0];
+    const [url, options] = vi.mocked(fetch).mock.calls[0];
+    expect(url).toBe("/api/v1/notes");
     expect(options).toMatchObject({ credentials: "include" });
   });
 
   it("não tenta fazer parse de corpo em respostas 204", async () => {
     vi.mocked(fetch).mockResolvedValueOnce(new Response(null, { status: 204 }));
 
-    const result = await apiFetch("/api/v1/notes/123");
+    const result = await apiFetch("/v1/notes/123");
 
     expect(result).toBeUndefined();
   });
@@ -54,7 +55,7 @@ describe("apiFetch", () => {
       new Response(JSON.stringify(problem), { status: 401 }),
     );
 
-    await expect(apiFetch("/api/v1/notes")).rejects.toMatchObject({
+    await expect(apiFetch("/v1/notes")).rejects.toMatchObject({
       status: 401,
       problem,
       message: "Missing session cookie",
@@ -66,7 +67,7 @@ describe("apiFetch", () => {
       new Response("not json", { status: 500 }),
     );
 
-    const error = await apiFetch("/api/v1/notes").catch((e: unknown) => e);
+    const error = await apiFetch("/v1/notes").catch((e: unknown) => e);
 
     expect(error).toBeInstanceOf(ApiError);
     expect((error as ApiError).status).toBe(500);

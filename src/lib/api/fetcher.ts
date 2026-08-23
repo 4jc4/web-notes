@@ -3,9 +3,9 @@
 //
 // - cookies de sessão (credentials: 'include') — a API usa sessão por
 //   cookie, nunca Bearer Token (ver CLAUDE.md);
-// - os paths já vêm completos do contrato OpenAPI (ex.: "/api/v1/notes",
-//   "/health"), então não há base path para montar aqui — nunca IP
-//   interno, nunca lógica de origem;
+// - o contrato representa as rotas internas do NestJS (ex.: "/v1/notes",
+//   "/health"); este mutator acrescenta a fronteira pública `/api`,
+//   pertencente ao proxy, sem expor IP interno ou trocar de origem;
 // - parsing uniforme de erro RFC 7807 (application/problem+json), que é
 //   o formato que a API sempre devolve (ver ProblemDetailsFilter no
 //   api-notes).
@@ -47,7 +47,7 @@ export async function apiFetch<T>(
   url: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const response = await fetch(url, {
+  const response = await fetch(`/api${url}`, {
     ...options,
     credentials: 'include',
     headers: {

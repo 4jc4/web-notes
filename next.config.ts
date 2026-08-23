@@ -21,7 +21,9 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: `${API_PROXY_TARGET}/api/:path*`,
+        // Espelha o Nginx de produção: `/api` é a fronteira pública e
+        // não faz parte das rotas internas do NestJS.
+        destination: `${API_PROXY_TARGET}/:path*`,
       },
     ];
   },
