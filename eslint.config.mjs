@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Gerado pelo Orval — nunca editado manualmente, não faz sentido
+    // aplicar nossas regras de lint (ver CLAUDE.md).
+    "src/generated/**",
   ]),
 ]);
 

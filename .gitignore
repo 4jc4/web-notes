@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# contrato OpenAPI: cópia manual de api-notes/openapi/openapi.json
+# enquanto a distribuição formal entre os repositórios não é decidida
+# (ver docs/deployment.md e orval.config.ts)
+/openapi
