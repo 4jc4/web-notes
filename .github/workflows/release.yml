@@ -46,12 +46,9 @@ jobs:
             ghcr.io/4jc4/web-notes:${{ github.sha }}
             ghcr.io/4jc4/web-notes:latest
 
-  # Requer um runner self-hosted registrado neste repositório
-  # (4jc4/web-notes) em LXC 105 e /opt/app/docker-compose.yml já
-  # presente lá — nenhum dos dois existe ainda. Até que existam, este
-  # job fica pendurado (nenhum runner disponível) sem afetar o job
-  # "build" acima, que já publica a imagem normalmente. Ver
-  # docs/infrastructure.md e docs/runbook.md.
+  # Executado pelo runner dedicado de 4jc4/web-notes no LXC 103. O
+  # runner acessa o usuário deploy do LXC 105 por SSH e mantém o
+  # docker-compose.yml em /opt/app.
   deploy:
     name: Deploy production
     needs: build

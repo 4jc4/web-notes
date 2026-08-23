@@ -82,23 +82,12 @@ Estrutura esperada:
 
 Não manter clone Git de produção nesse host.
 
-> Status: nada disso está provisionado ainda em LXC 105. O
-> `docker-compose.yml` do repositório está pronto para ser copiado
-> (`.env` nem é necessário — o frontend não usa variável de ambiente em
-> produção). Falta:
->
-> 1. `mkdir -p /opt/app` em LXC 105;
-> 2. registrar um runner self-hosted para `4jc4/web-notes` (token via
->    `gh api repos/4jc4/web-notes/actions/runners/registration-token`,
->    ou pela UI em Settings → Actions → Runners) — pode ser uma segunda
->    instância do `actions-runner` em LXC 103, apontada para este
->    repositório em vez do `api-notes`;
-> 3. usuário `deploy` com chave SSH autorizada, igual ao LXC 102.
->
-> Sem isso, o job `deploy` de `.github/workflows/release.yml` fica
-> pendurado esperando um runner que não existe — não falha, só nunca
-> roda. O job `build` (publica no GHCR) funciona independentemente
-> disso.
+> Status: provisionado em 2026-08-23. O LXC 105 possui `/opt/app`,
+> usuário `deploy` no grupo Docker e chave SSH autorizada a partir do
+> LXC 103. O runner dedicado `lxc-runner-web` executa no LXC 103 como o
+> serviço systemd
+> `actions.runner.4jc4-web-notes.lxc-runner-web.service`. O primeiro
+> deploy automatizado concluiu com healthcheck saudável.
 
 ---
 
