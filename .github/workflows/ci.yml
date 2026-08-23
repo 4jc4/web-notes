@@ -46,12 +46,128 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Unit & component tests
+        run: npm run test
+
       # `next build` já roda o type-check completo do projeto (fase
       # "Running TypeScript" do próprio Next). Um `tsc --noEmit`
       # separado antes do build falharia: tipos como `LayoutProps`
       # só existem em `.next/types/`, gerado pelo próprio build.
       - name: Build
         run: npm run build
+
+  e2e:
+    name: E2E (login + CRUD contra API real)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    # Sobe o api-notes de verdade (checkout do repo público, não a
+    # imagem Docker — evita depender de devDependencies que a imagem
+    # de runtime não carrega, como tsx pro seed) contra um Postgres
+    # real, e este frontend buildado, e roda o fluxo completo
+    # login -> criar -> persistir -> apagar -> logout via Playwright.
+    # Mesmo passo a passo validado manualmente antes deste job existir.
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: notes_user
+          POSTGRES_PASSWORD: devpassword
+          POSTGRES_DB: notes
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U notes_user"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - name: Checkout web-notes
+        uses: actions/checkout@v4
+        with:
+          path: web-notes
+
+      - name: Checkout api-notes
+        uses: actions/checkout@v4
+        with:
+          repository: 4jc4/api-notes
+          path: api-notes
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            web-notes/package-lock.json
+            api-notes/package-lock.json
+
+      - name: Install, migrate, seed and start api-notes
+        working-directory: api-notes
+        env:
+          DATABASE_URL: postgresql://notes_user:devpassword@localhost:5432/notes
+          SESSION_SECRET: e2e-ci-secret-not-for-production-use-only-32chars
+          SESSION_TTL: 7d
+          NODE_ENV: development
+          PORT: 3001
+        run: |
+          npm ci
+          npx prisma generate
+          npx prisma migrate deploy
+          npx prisma db seed
+          nohup npm run start:dev > /tmp/api-notes.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:3001/health >/dev/null 2>&1 && echo "api-notes pronta" && exit 0
+            sleep 2
+          done
+          echo "::error::api-notes não ficou pronta a tempo"
+          cat /tmp/api-notes.log
+          exit 1
+
+      - name: Install and build web-notes
+        working-directory: web-notes
+        run: |
+          npm ci
+          npm run build
+
+      - name: Start web-notes
+        working-directory: web-notes
+        env:
+          API_PROXY_TARGET: http://localhost:3001
+        run: |
+          nohup npm run start > /tmp/web-notes.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:3000 >/dev/null 2>&1 && echo "web-notes pronto" && exit 0
+            sleep 1
+          done
+          echo "::error::web-notes não ficou pronto a tempo"
+          cat /tmp/web-notes.log
+          exit 1
+
+      - name: Install Playwright browsers
+        working-directory: web-notes
+        run: npx playwright install --with-deps chromium
+
+      - name: Run e2e tests
+        working-directory: web-notes
+        run: npm run test:e2e
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: web-notes/playwright-report/
+          retention-days: 7
+
+      - name: Server logs (always, for debugging)
+        if: always()
+        run: |
+          echo "=== api-notes ==="
+          cat /tmp/api-notes.log || true
+          echo "=== web-notes ==="
+          cat /tmp/web-notes.log || true
 
   lint-pr-title:
     name: Lint PR Title

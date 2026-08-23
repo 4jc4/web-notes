@@ -37,11 +37,40 @@ Nunca edite `src/generated/api/` manualmente — corrija o contrato
 OpenAPI, `orval.config.ts` ou o mutator em `src/lib/api/fetcher.ts`, e
 gere de novo.
 
+## Testes
+
+```bash
+npm run test        # unitários/componente (Vitest + Testing Library)
+npm run test:watch  # idem, em watch mode
+npm run test:e2e    # e2e (Playwright) — exige api-notes rodando (ver abaixo)
+```
+
+Os testes e2e (`e2e/notes.spec.ts`) rodam contra a aplicação de verdade
+— não fazem mock de nada. Antes de rodar `npm run test:e2e` localmente,
+suba as duas pontas:
+
+```bash
+# num terminal, no repo api-notes (PORT=3001 — 3000 já é o deste
+# frontend; API_PROXY_TARGET aqui já aponta pra 3001 por padrão):
+docker compose -f docker-compose.dev.yml up -d
+npx prisma migrate deploy && npx prisma db seed
+PORT=3001 npm run start:dev
+
+# noutro terminal, aqui:
+npm run dev
+```
+
+O CI (`.github/workflows/ci.yml`, job `e2e`) faz isso automaticamente
+a cada PR: sobe Postgres real, clona e roda o `api-notes` de verdade,
+builda este frontend, e roda o Playwright contra os dois.
+
 ## Scripts
 
 - `npm run dev` — dev server (Turbopack)
 - `npm run build` — build de produção
 - `npm run lint` — ESLint
+- `npm run test` — testes unitários/componente
+- `npm run test:e2e` — testes e2e (Playwright)
 - `npm run api:generate` — gera `src/generated/api/` a partir de `openapi/openapi.json`
 
 ## Deploy
