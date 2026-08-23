@@ -41,7 +41,7 @@ export const getAuthControllerLoginUrl = () => {
 
 
 
-  return `/api/v1/auth/login`
+  return `/v1/auth/login`
 }
 
 export const authControllerLogin = async (loginDto: LoginDto, options?: Parameters<typeof apiFetch>[1]): Promise<AuthUserDtoOutput> => {
@@ -68,7 +68,7 @@ export const getAuthControllerLogoutUrl = () => {
 
 
 
-  return `/api/v1/auth/logout`
+  return `/v1/auth/logout`
 }
 
 export const authControllerLogout = async ( options?: Parameters<typeof apiFetch>[1]): Promise<void> => {
@@ -89,7 +89,7 @@ export const getNotesControllerCreateUrl = () => {
 
 
 
-  return `/api/v1/notes`
+  return `/v1/notes`
 }
 
 export const notesControllerCreate = async (createNoteDto: CreateNoteDto, options?: Parameters<typeof apiFetch>[1]): Promise<NoteDto> => {
@@ -116,7 +116,7 @@ export const getNotesControllerFindAllUrl = () => {
 
 
 
-  return `/api/v1/notes`
+  return `/v1/notes`
 }
 
 export const notesControllerFindAll = async ( options?: Parameters<typeof apiFetch>[1]): Promise<NoteDto[]> => {
@@ -137,7 +137,7 @@ export const getNotesControllerFindOneUrl = (id: string,) => {
 
 
 
-  return `/api/v1/notes/${id}`
+  return `/v1/notes/${id}`
 }
 
 export const notesControllerFindOne = async (id: string, options?: Parameters<typeof apiFetch>[1]): Promise<NoteDto> => {
@@ -158,7 +158,7 @@ export const getNotesControllerUpdateUrl = (id: string,) => {
 
 
 
-  return `/api/v1/notes/${id}`
+  return `/v1/notes/${id}`
 }
 
 export const notesControllerUpdate = async (id: string,
@@ -186,7 +186,7 @@ export const getNotesControllerRemoveUrl = (id: string,) => {
 
 
 
-  return `/api/v1/notes/${id}`
+  return `/v1/notes/${id}`
 }
 
 export const notesControllerRemove = async (id: string, options?: Parameters<typeof apiFetch>[1]): Promise<void> => {
