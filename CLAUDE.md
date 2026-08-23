@@ -68,7 +68,7 @@ Código executado no navegador deve consumir a API por caminhos relativos.
 Exemplo:
 
 ```ts
-fetch('/api/...');
+fetch("/api/...");
 ```
 
 Nunca usar no browser:
@@ -81,6 +81,12 @@ IPs e portas internas pertencem à infraestrutura e não ao código
 client-side.
 
 Nunca expor endereços internos por variáveis `NEXT_PUBLIC_*`.
+
+O contrato OpenAPI descreve as rotas internas do NestJS (`/v1/*` e
+`/health`). `src/lib/api/fetcher.ts` acrescenta `/api` no browser. Em
+produção, o Nginx remove `/api` antes de encaminhar ao backend; em
+desenvolvimento, o rewrite de `next.config.ts` reproduz exatamente
+essa remoção. Não inserir `/api` de volta no código gerado.
 
 ---
 
@@ -380,6 +386,14 @@ Não executar nele:
 - `npm install`
 - `npm run build`
 - `docker build`
+
+Estado validado em 2026-08-23:
+
+- release ARM64 e deploy do frontend concluindo automaticamente;
+- runner dedicado `lxc-runner-web` ativo no LXC 103;
+- container `app-frontend-1` saudável no LXC 105;
+- Nginx publicando o frontend em `/` e a API em `/api/*`;
+- `/login` e `/api/health` respondendo em produção.
 
 ---
 

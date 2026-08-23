@@ -162,6 +162,10 @@ testes
 build
 ```
 
+O workflow atual separa essas verificações em três checks: título da
+PR, `Lint & Build` e E2E com login/CRUD contra uma API e PostgreSQL
+reais do ambiente de CI.
+
 ---
 
 ## Detecção de código gerado desatualizado
@@ -242,6 +246,12 @@ Depois do merge em `main`:
 > healthcheck antes de concluir o release. Ver `docs/runbook.md` para
 > reconstrução e recuperação.
 
+O runner utilizado é o serviço
+`actions.runner.4jc4-web-notes.lxc-runner-web.service` no LXC 103. Ele
+acessa `deploy@192.168.1.34`, mantém `/opt/app/docker-compose.yml`, faz
+login efêmero no GHCR, aplica `IMAGE_TAG=${{ github.sha }}` e aceita
+resposta `200` ou `307` no healthcheck da raiz.
+
 ---
 
 ## Produção
@@ -296,3 +306,14 @@ Não gerar novamente o cliente da API no servidor durante rollback.
 
 O artefato Docker deve conter exatamente a versão do frontend construída
 e validada pelo CI.
+
+Procedimento operacional:
+
+```bash
+ssh cardoso@192.168.1.24
+sudo pct exec 105 -- sh -lc \
+  'cd /opt/app && IMAGE_TAG=<sha-saudavel> docker compose pull frontend && IMAGE_TAG=<sha-saudavel> docker compose up -d frontend'
+```
+
+Depois, confirme `healthy`, `GET /login = 200` e que o backend continua
+respondendo em `/api/health`.
