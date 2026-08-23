@@ -46,9 +46,10 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Type check
-        run: npx tsc --noEmit
-
+      # `next build` já roda o type-check completo do projeto (fase
+      # "Running TypeScript" do próprio Next). Um `tsc --noEmit`
+      # separado antes do build falharia: tipos como `LayoutProps`
+      # só existem em `.next/types/`, gerado pelo próprio build.
       - name: Build
         run: npm run build
 
