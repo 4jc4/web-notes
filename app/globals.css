@@ -1,26 +1,112 @@
 @import "tailwindcss";
 
+/*
+ * Notas — sistema de tokens.
+ *
+ * Referência: caderno/ficha de anotações. Fundo tipo linho claro, cartões
+ * de nota brancos como fichas sobre a mesa, tinta verde-escura como cor
+ * de ação (em vez do azul/roxo padrão), e uma trilha de "furos de
+ * caderno" na lista de notas — o elemento de assinatura da interface.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --paper: #eff1ec;
+  --card: #ffffff;
+  --ink: #1a1d1b;
+  --ink-soft: #5b6058;
+  --ink-faint: #8b9088;
+  --line: #d8dad3;
+  --accent: #16594a;
+  --accent-strong: #0f4238;
+  --accent-soft: #e4ede9;
+  --danger: #b3261e;
+  --danger-soft: #f6e6e4;
+  --focus-ring: #16594a;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --font-display: var(--font-display);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --paper: #14161a;
+    --card: #1d2023;
+    --ink: #eceee9;
+    --ink-soft: #9ba39b;
+    --ink-faint: #6c716b;
+    --line: #2a2e2a;
+    --accent: #4fd8b8;
+    --accent-strong: #7ce6cb;
+    --accent-soft: #16302a;
+    --danger: #ff8a7c;
+    --danger-soft: #3a1f1c;
+    --focus-ring: #4fd8b8;
   }
 }
 
+* {
+  border-color: var(--line);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Trilha de furos de caderno — o elemento de assinatura da lista de
+   notas. Pontos regulares na borda esquerda, como as perfurações de um
+   fichário. */
+.notebook-rail {
+  background-image: radial-gradient(
+    circle,
+    var(--line) 1.5px,
+    transparent 1.5px
+  );
+  background-size: 1.5rem 1.75rem;
+  background-repeat: repeat-y;
+  background-position: left center;
+}
+
+@keyframes note-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.note-enter {
+  animation: note-enter 240ms ease-out;
 }

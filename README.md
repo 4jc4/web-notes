@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Notas — frontend
 
-## Getting Started
+Frontend web da aplicação **Notas** (Next.js + React + TypeScript),
+consumindo a API NestJS (`api-notes`) via um cliente gerado pelo Orval a
+partir do contrato OpenAPI.
 
-First, run the development server:
+Antes de mexer em autenticação, integração com a API, Docker ou CI/CD,
+leia [`CLAUDE.md`](./CLAUDE.md) e a documentação em [`docs/`](./docs).
+
+## Rodando localmente
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre em [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+O frontend espera a API NestJS (`api-notes`) rodando localmente — por
+padrão em `http://localhost:3001` (ver `API_PROXY_TARGET` em
+[`.env.example`](./.env.example) e o rewrite em
+[`next.config.ts`](./next.config.ts), que existe só para o dev server;
+em produção o Nginx já roteia `/api/*` direto para a API).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Gerando o cliente da API
 
-## Learn More
+O contrato OpenAPI ainda não tem distribuição automática entre os dois
+repositórios (ver [`docs/deployment.md`](./docs/deployment.md)). Por
+ora:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# no repo api-notes
+npm run openapi:generate
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# copie api-notes/openapi/openapi.json para openapi/openapi.json aqui, depois:
+npm run api:generate
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Nunca edite `src/generated/api/` manualmente — corrija o contrato
+OpenAPI, `orval.config.ts` ou o mutator em `src/lib/api/fetcher.ts`, e
+gere de novo.
 
-## Deploy on Vercel
+## Scripts
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `npm run dev` — dev server (Turbopack)
+- `npm run build` — build de produção
+- `npm run lint` — ESLint
+- `npm run api:generate` — gera `src/generated/api/` a partir de `openapi/openapi.json`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deploy
+
+Build e deploy passam por CI/CD (GitHub Actions → GHCR → self-hosted
+runner), nunca por build manual em produção. Detalhes em
+[`docs/deployment.md`](./docs/deployment.md) e
+[`docs/infrastructure.md`](./docs/infrastructure.md).
