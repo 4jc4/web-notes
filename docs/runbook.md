@@ -66,7 +66,7 @@ espera o contrato antigo.
 Não resolver com:
 
 ```ts
-any
+any;
 ```
 
 ou:
@@ -171,21 +171,21 @@ Não alterar o cliente gerado para contornar autorização.
 No Proxmox:
 
 ```bash
-pct status 105
+ssh cardoso@192.168.1.24
+sudo pct status 105
 ```
 
 Verificar containers:
 
 ```bash
-pct exec 105 -- docker ps
+sudo pct exec 105 -- docker ps
 ```
 
-Dentro do host:
+No LXC, através do Proxmox:
 
 ```bash
-cd /opt/app
-docker compose ps
-docker compose logs --tail=100
+sudo pct exec 105 -- sh -lc 'cd /opt/app && docker compose ps'
+sudo pct exec 105 -- sh -lc 'cd /opt/app && docker compose logs --tail=100'
 ```
 
 ---
@@ -195,18 +195,16 @@ docker compose logs --tail=100
 No LXC 103:
 
 ```bash
-systemctl status \
-  actions.runner.4jc4-api-notes.lxc-runner.service \
-  --no-pager -l
+sudo pct exec 103 -- systemctl status \
+  actions.runner.4jc4-web-notes.lxc-runner-web.service --no-pager -l
 ```
 
 Logs:
 
 ```bash
-journalctl \
-  -u actions.runner.4jc4-api-notes.lxc-runner.service \
-  -n 100 \
-  --no-pager
+sudo pct exec 103 -- journalctl \
+  -u actions.runner.4jc4-web-notes.lxc-runner-web.service \
+  -n 100 --no-pager
 ```
 
 Estado saudável deve apresentar mensagens equivalentes a:
@@ -225,7 +223,7 @@ Listening for Jobs
 No LXC 103:
 
 ```bash
-sudo -u runner ssh \
+sudo pct exec 103 -- runuser -u runner -- ssh \
   -o BatchMode=yes \
   -o ConnectTimeout=5 \
   deploy@192.168.1.34 \
@@ -375,3 +373,34 @@ registrados para reconstrução ou recuperação do ambiente:
 
 Estado validado: runner ativo, acesso SSH funcional, Compose instalado
 em `/opt/app` e container `app-frontend-1` saudável no LXC 105.
+
+---
+
+## 17. Proxy e validação ponta a ponta
+
+```bash
+curl -i https://notas.ajca.com.br/login
+curl -i https://notas.ajca.com.br/api/health
+curl -i https://notas.ajca.com.br/api/v1/notes
+```
+
+Sem sessão, o esperado é:
+
+```text
+/login         → 200
+/api/health    → 200
+/api/v1/notes  → 401
+```
+
+Se `/api/v1/notes` retornar `404`, confirme se o Nginx remove `/api` e
+se a imagem da API possui rotas internas `/v1/*`.
+
+Verifique o proxy:
+
+```bash
+sudo pct exec 104 -- nginx -t
+sudo pct exec 104 -- systemctl status nginx --no-pager
+```
+
+Nunca mantenha backups dentro de `sites-enabled`, pois o wildcard do
+Nginx também os carrega. Use `/etc/nginx/backups/`.

@@ -9,15 +9,30 @@ arquitetura ARM64.
 
 ## Inventário
 
-| VMID | Hostname | Função | IP |
-|------|----------|--------|----|
-| 101 | postgres | PostgreSQL | rede interna |
-| 102 | api | NestJS / Docker | 192.168.1.31 |
-| 103 | runner | GitHub Actions self-hosted runner | rede interna |
-| 104 | proxy | Nginx / Cloudflare Tunnel | rede interna |
-| 105 | frontend | Next.js / Docker | 192.168.1.34 |
+| VMID | Hostname | Função                             | IP           |
+| ---- | -------- | ---------------------------------- | ------------ |
+| 101  | postgres | PostgreSQL                         | 192.168.1.30 |
+| 102  | api      | NestJS / Docker                    | 192.168.1.31 |
+| 103  | runner   | GitHub Actions self-hosted runners | 192.168.1.32 |
+| 104  | proxy    | Nginx / Cloudflare Tunnel          | 192.168.1.33 |
+| 105  | frontend | Next.js / Docker                   | 192.168.1.34 |
 
 Atualizar esta tabela quando a infraestrutura mudar.
+
+Host Proxmox:
+
+```text
+acesso:       cardoso@192.168.1.24
+hostname:     pve
+plataforma:   Raspberry Pi 4 / ARM64
+Proxmox VE:   9
+```
+
+Ordem de boot:
+
+```text
+101 PostgreSQL → 102 API → 105 Frontend → 104 Proxy → 103 Runner
+```
 
 ---
 
@@ -76,8 +91,7 @@ Estrutura esperada:
 
 ```text
 /opt/app/
-├── docker-compose.yml
-└── .env
+└── docker-compose.yml
 ```
 
 Não manter clone Git de produção nesse host.
@@ -104,6 +118,8 @@ A exposição pública ocorre através do reverse proxy:
 https://notas.ajca.com.br/api/
 ```
 
+Container: `app-api-1`, porta 3000, healthcheck `/health`.
+
 ---
 
 ## LXC 103 — Runner
@@ -124,6 +140,13 @@ Runner 103
 
 O runner é orquestrador, não host de aplicação.
 
+Serviços ativos:
+
+```text
+actions.runner.4jc4-api-notes.lxc-runner.service
+actions.runner.4jc4-web-notes.lxc-runner-web.service
+```
+
 ---
 
 ## LXC 104 — Proxy
@@ -138,6 +161,19 @@ Roteamento:
 ```
 
 Também participa do caminho do Cloudflare Tunnel.
+
+Configuração pública:
+
+```text
+/       → http://192.168.1.34:3000
+/api/*  → http://192.168.1.31:3000/*
+```
+
+O proxy remove `/api`. Backup conhecido:
+
+```text
+/etc/nginx/backups/notas.ajca.com.br.bak-20260823
+```
 
 ---
 
@@ -177,6 +213,15 @@ ghcr.io
 
 As imagens devem ser identificáveis pelo commit SHA.
 
+Containers esperados:
+
+```text
+LXC 102: app-api-1
+LXC 105: app-frontend-1
+```
+
+Ambos devem permanecer `healthy`.
+
 ---
 
 ## Segredos
@@ -192,3 +237,6 @@ Nunca documentar valores reais de:
 - chaves SSH privadas.
 
 Documentar somente nomes de variáveis quando necessário.
+
+Pendências operacionais conhecidas: formalizar e testar backups de
+PostgreSQL/LXCs e revisar a política de firewall do Proxmox.

@@ -52,6 +52,19 @@ Roteamento:
                                LXC 101 — PostgreSQL
 ```
 
+Endereçamento interno:
+
+| VMID | Serviço                | IP             |
+| ---: | ---------------------- | -------------- |
+|  101 | PostgreSQL             | `192.168.1.30` |
+|  102 | NestJS                 | `192.168.1.31` |
+|  103 | GitHub Actions runners | `192.168.1.32` |
+|  104 | Nginx / proxy          | `192.168.1.33` |
+|  105 | Next.js                | `192.168.1.34` |
+
+O Cloudflare Tunnel fornece a entrada pública. O Nginx é a fronteira
+de roteamento da aplicação.
+
 ---
 
 ## Contrato entre frontend e API
@@ -166,6 +179,12 @@ Exemplos:
 
 O cliente não deve introduzir JWT ou Bearer Token.
 
+O contrato gerado contém caminhos internos, por exemplo
+`/v1/notes`. O mutator `src/lib/api/fetcher.ts` converte esse caminho
+para `/api/v1/notes` no browser. O Nginx remove `/api` ao encaminhar à
+API. O rewrite de desenvolvimento em `next.config.ts` mantém a mesma
+semântica.
+
 ---
 
 ## Same-origin
@@ -198,7 +217,7 @@ Fluxo:
 Browser
    │
    ▼
-/api/auth/...
+/api/v1/auth/...
    │
    ▼
 NestJS
@@ -217,6 +236,21 @@ Browser
 ```
 
 O cliente gerado deve respeitar essa arquitetura.
+
+O cookie de sessão é `HttpOnly`; o frontend não lê nem persiste tokens.
+As chamadas usam `credentials: 'include'`.
+
+---
+
+## Runtime e deploy
+
+O frontend roda como `app-frontend-1` no LXC 105, porta 3000, por
+Docker Compose. A imagem é `linux/arm64`, publicada no GHCR com a tag do
+commit SHA. O runner dedicado em LXC 103 executa o deploy por SSH e
+exige healthcheck saudável antes de concluir o release.
+
+Produção não mantém clone Git e não executa Orval, `npm ci`, build do
+Next.js ou Docker build.
 
 ---
 
