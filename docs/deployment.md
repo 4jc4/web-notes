@@ -236,14 +236,11 @@ Depois do merge em `main`:
 8. container é recriado;
 9. healthcheck é executado.
 
-> Status: passos 1–5 implementados e funcionando (job `build` de
-> `release.yml`). Passos 6–9 estão escritos (job `deploy`, mesmo
-> `runs-on: self-hosted` do `api-notes`) mas **bloqueados** — não há
-> runner self-hosted registrado em `4jc4/web-notes`, nem
-> `/opt/app/docker-compose.yml` em LXC 105. Isso exige acesso físico à
-> infraestrutura (LXC 103/105), que não está disponível aqui. Até lá, o
-> job `deploy` fica pendurado (nenhum runner disponível) sem afetar o
-> `build`. Ver `docs/runbook.md` para os passos exatos de provisionar.
+> Status: fluxo completo provisionado e validado em 2026-08-23. O
+> runner dedicado `lxc-runner-web` executa no LXC 103, envia o Compose
+> ao `/opt/app` do LXC 105, implanta a imagem ARM64 e confirma o
+> healthcheck antes de concluir o release. Ver `docs/runbook.md` para
+> reconstrução e recuperação.
 
 ---
 

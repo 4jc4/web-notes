@@ -342,10 +342,10 @@ Durante troubleshooting, não:
 
 ---
 
-## 16. Provisionar o deploy (LXC 105) pela primeira vez
+## 16. Provisionamento do deploy (LXC 105)
 
-O job `build` de `.github/workflows/release.yml` (publica no GHCR) já
-funciona sozinho. O job `deploy` depende do que segue, ainda não feito:
+O provisionamento abaixo foi concluído em 2026-08-23. Estes passos ficam
+registrados para reconstrução ou recuperação do ambiente:
 
 1. **Registrar um runner self-hosted para este repositório.** O
    `api-notes` já tem um em LXC 103
@@ -360,7 +360,7 @@ funciona sozinho. O job `deploy` depende do que segue, ainda não feito:
    No LXC 103, instalar uma segunda instância do `actions-runner`
    (diretório separado da instância do `api-notes`), configurada com
    esse token e um nome de serviço diferente, ex.
-   `actions.runner.4jc4-web-notes.lxc-runner.service`. Ver a
+   `actions.runner.4jc4-web-notes.lxc-runner-web.service`. Ver a
    [documentação oficial do GitHub](https://docs.github.com/actions/hosting-your-own-runners)
    para os comandos exatos de `config.sh`/`svc.sh`.
 
@@ -368,12 +368,10 @@ funciona sozinho. O job `deploy` depende do que segue, ainda não feito:
    SSH para o usuário `deploy` (mesmo padrão do LXC 102), autorizar essa
    chave a partir do runner em LXC 103.
 
-3. **Primeiro push em `main`** depois disso: o job `deploy` já vai
+3. **Primeiro push em `main`** depois disso: o job `deploy` vai
    encontrar o runner, copiar `docker-compose.yml`, logar no GHCR,
    subir o container e rodar o healthcheck — sem mudança nenhuma no
    workflow.
 
-Enquanto os passos 1–2 não forem feitos, o job `deploy` fica
-`queued`/pendurado esperando um runner disponível — não é um erro
-visível, só nunca conclui. Cancelar manualmente se isso confundir
-outras execuções (`gh run cancel <run-id>`).
+Estado validado: runner ativo, acesso SSH funcional, Compose instalado
+em `/opt/app` e container `app-frontend-1` saudável no LXC 105.
